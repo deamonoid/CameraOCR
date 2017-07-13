@@ -1,3 +1,3 @@
 # CameraOCR
 
-Give permission of Camera and Storage in permssion section.
+Give Camera and Storage permission to this app.
