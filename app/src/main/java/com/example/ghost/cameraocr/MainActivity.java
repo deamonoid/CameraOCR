@@ -49,18 +49,19 @@ public class MainActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+
                         // get an image from the camera
                         mCamera.takePicture(null, null, mPicture);
                     }
                 }
         );
 
+
         Camera.Parameters parameters = mCamera.getParameters();
         List<String> focusModes = parameters.getSupportedFocusModes();
-        if(focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)){
+        if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
             parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-        } else
-        if(focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)){
+        } else if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
             parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
         }
 
@@ -92,6 +93,10 @@ public class MainActivity extends AppCompatActivity {
     private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
         @Override
         public void onPictureTaken(byte[] bytes, Camera camera) {
+
+            //To start the Preview after taking picture
+            mCamera.startPreview();
+
             File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
             if (pictureFile == null) {
                 Log.d(TAG, "Error creating media file, check storage permissions: ");
