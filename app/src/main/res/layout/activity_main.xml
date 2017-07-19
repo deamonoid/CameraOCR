@@ -7,8 +7,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:orientation="horizontal"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:orientation="horizontal">
 
         <FrameLayout
             android:id="@+id/camera_preview"
@@ -25,10 +25,16 @@
     </LinearLayout>
 
     <ImageView
+        android:id="@+id/captured_image"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/captured_image"
-        android:padding="15dp"
-        android:contentDescription="@string/bitmap_image"/>
+        android:contentDescription="@string/bitmap_image"
+        android:padding="15dp" />
+
+    <TextView
+        android:id="@+id/OCRTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp" />
 
 </LinearLayout>
