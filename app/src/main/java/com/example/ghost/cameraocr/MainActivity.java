@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
     private TessBaseAPI mTess;
     private Camera mCamera;
     private CameraPreview mPreview;
+    Context mContext;
+    Timer timer = new Timer();
 
     private FrameLayout cameraPreviewLayout;
     private ImageView capturedImageHolder;
@@ -55,10 +59,25 @@ public class MainActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        mCamera.takePicture(null, null, mPicture);
+                        timer.schedule(new TimerTask() {
+                            @Override
+                            public void run ()
+                            {
+                                mCamera.startPreview();
+                                mCamera.takePicture(null, null, mPicture);
+                                /*runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        processImage();
+                                    }
+                                });*/
+                            }
+                        },0,500);
                     }
                 }
         );
+
+
 
 
         //initializing Tesseract API
@@ -167,7 +186,6 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-
     public void processImage(View view) {
 
         String OCRresult = null;
