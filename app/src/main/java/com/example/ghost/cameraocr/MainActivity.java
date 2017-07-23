@@ -34,9 +34,6 @@ public class MainActivity extends AppCompatActivity {
     private TessBaseAPI mTess;
     private Camera mCamera;
     private CameraPreview mPreview;
-    Context mContext;
-
-
     private FrameLayout cameraPreviewLayout;
     private ImageView capturedImageHolder;
 
@@ -48,12 +45,27 @@ public class MainActivity extends AppCompatActivity {
 
         cameraPreviewLayout = (FrameLayout) findViewById(R.id.camera_preview);
         capturedImageHolder = (ImageView) findViewById(R.id.captured_image);
+        final Button OCRButton = (Button) findViewById(R.id.OCRbutton);
+        final Button captureButton = (Button) findViewById(R.id.button_capture);
 
         mCamera = getCameraInstance();
         mPreview = new CameraPreview(this, mCamera);
         cameraPreviewLayout.addView(mPreview);
 
-        Button captureButton = (Button) findViewById(R.id.button_capture);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                captureButton.performClick();
+            }
+        },1000);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                OCRButton.performClick();
+            }
+        },2000);
+
         captureButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
@@ -64,17 +76,17 @@ public class MainActivity extends AppCompatActivity {
                             public void run() {
                                 mCamera.startPreview();
                                 mCamera.takePicture(null, null, mPicture);
-                                handler.postDelayed(this, 1000);
+                                handler.postDelayed(this, 600);
                             }
                         };
-                        handler.postDelayed(runnable, 1000);
+                        handler.postDelayed(runnable, 600);
                     }
                 }
         );
 
-        Button OCRButton = (Button) findViewById(R.id.OCRbutton);
+
         OCRButton.setOnClickListener(
-                new View.OnClickListener(){
+                new View.OnClickListener() {
                     @Override
                     public void onClick(View V) {
                         final Handler handler = new Handler();
