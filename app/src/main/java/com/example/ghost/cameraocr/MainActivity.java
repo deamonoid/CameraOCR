@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -24,8 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private Camera mCamera;
     private CameraPreview mPreview;
     Context mContext;
-    Timer timer = new Timer();
+
 
     private FrameLayout cameraPreviewLayout;
     private ImageView capturedImageHolder;
@@ -59,25 +58,37 @@ public class MainActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        timer.schedule(new TimerTask() {
+                        final Handler handler = new Handler();
+                        Runnable runnable = new Runnable() {
                             @Override
-                            public void run ()
-                            {
+                            public void run() {
                                 mCamera.startPreview();
                                 mCamera.takePicture(null, null, mPicture);
-                                /*runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        processImage();
-                                    }
-                                });*/
+                                handler.postDelayed(this, 1000);
                             }
-                        },0,600);
+                        };
+                        handler.postDelayed(runnable, 1000);
                     }
                 }
         );
 
-
+        Button OCRButton = (Button) findViewById(R.id.OCRbutton);
+        OCRButton.setOnClickListener(
+                new View.OnClickListener(){
+                    @Override
+                    public void onClick(View V) {
+                        final Handler handler = new Handler();
+                        Runnable runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                processImage();
+                                handler.postDelayed(this, 1000);
+                            }
+                        };
+                        handler.postDelayed(runnable, 1000);
+                    }
+                }
+        );
 
 
         //initializing Tesseract API
@@ -186,7 +197,8 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-    public void processImage(View view) {
+
+    public void processImage() {
 
         String OCRresult = null;
         mTess.setImage(resizedBitmap);
