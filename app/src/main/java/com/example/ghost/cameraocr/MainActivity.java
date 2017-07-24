@@ -43,6 +43,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Immersive Mode
+
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+
+        //Camera Handler
+
         cameraPreviewLayout = (FrameLayout) findViewById(R.id.camera_preview);
         capturedImageHolder = (ImageView) findViewById(R.id.captured_image);
         final Button OCRButton = (Button) findViewById(R.id.OCRbutton);
@@ -57,14 +69,14 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 captureButton.performClick();
             }
-        },1000);
+        }, 1000);
 
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 OCRButton.performClick();
             }
-        },2000);
+        }, 2000);
 
         captureButton.setOnClickListener(
                 new View.OnClickListener() {
@@ -94,10 +106,10 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void run() {
                                 processImage();
-                                handler.postDelayed(this, 1000);
+                                handler.postDelayed(this, 500);
                             }
                         };
-                        handler.postDelayed(runnable, 1000);
+                        handler.postDelayed(runnable, 500);
                     }
                 }
         );
@@ -210,6 +222,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //Processing Image to OCR
     public void processImage() {
 
         String OCRresult = null;
