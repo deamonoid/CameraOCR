@@ -5,6 +5,9 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.ImageFormat;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,10 +17,10 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.googlecode.tesseract.android.TessBaseAPI;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -69,14 +72,14 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 captureButton.performClick();
             }
-        }, 1000);
+        }, 300);
 
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 OCRButton.performClick();
             }
-        }, 2000);
+        }, 500);
 
         captureButton.setOnClickListener(
                 new View.OnClickListener() {
@@ -87,11 +90,11 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void run() {
                                 mCamera.startPreview();
-                                mCamera.takePicture(null, null, mPicture);
-                                handler.postDelayed(this, 600);
+                                mCamera.setPreviewCallback(mPicture);
+                                handler.postDelayed(this, 200);
                             }
                         };
-                        handler.postDelayed(runnable, 600);
+                        handler.postDelayed(runnable, 200);
                     }
                 }
         );
@@ -106,10 +109,10 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void run() {
                                 processImage();
-                                handler.postDelayed(this, 500);
+                                handler.postDelayed(this, 300);
                             }
                         };
-                        handler.postDelayed(runnable, 500);
+                        handler.postDelayed(runnable, 300);
                     }
                 }
         );
@@ -158,17 +161,24 @@ public class MainActivity extends AppCompatActivity {
         return c;
     }
 
-
-    private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
+    Camera.PreviewCallback mPicture = new Camera.PreviewCallback() {
         @Override
-        public void onPictureTaken(byte[] bytes, Camera camera) {
+        public void onPreviewFrame(byte[] bytes, Camera camera) {
+            Camera.Parameters parameters = camera.getParameters();
+            int width = parameters.getPreviewSize().width;
+            int height = parameters.getPreviewSize().height;
 
-            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-            if (bitmap == null) {
-                Toast.makeText(MainActivity.this, "Captured image is empty", Toast.LENGTH_LONG).show();
-                return;
-            }
-            capturedImageHolder.setImageBitmap(scaleDownBitmapImage(bitmap, 300, 200));
+            ByteArrayOutputStream outstr = new ByteArrayOutputStream();
+            Rect rect = new Rect(0, 0, width, height);
+            YuvImage yuvimage = new YuvImage(bytes,
+                    ImageFormat.NV21, width, height, null);
+
+            yuvimage.compressToJpeg(rect, 100, outstr);
+            Bitmap bmp = BitmapFactory.decodeByteArray(
+                    outstr.toByteArray(), 0, outstr.size());
+
+            capturedImageHolder.setImageBitmap(scaleDownBitmapImage(bmp, 300, 200));
+
         }
     };
 
