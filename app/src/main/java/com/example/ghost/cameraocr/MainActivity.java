@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
@@ -223,9 +224,105 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private Bitmap scaleDownBitmapImage(Bitmap bitmap, int newWidth, int newHeight) {
-        resizedBitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true);
+    private Bitmap scaleDownBitmapImage(Bitmap img, int newWidth, int newHeight) {
+
+        resizedBitmap = Bitmap.createScaledBitmap(img, newWidth, newHeight, true);
+
+        /*resizedBitmap = img.copy(img.getConfig(), true);
+        double nWidthFactor = (double) img.getWidth() / (double) newWidth;
+        double nHeightFactor = (double) img.getHeight() / (double) newHeight;
+
+        double fx, fy, nx, ny;
+        int cx, cy, fr_x, fr_y;
+        int color1;
+        int color2;
+        int color3;
+        int color4;
+        byte nRed, nGreen, nBlue;
+
+        byte bp1, bp2;
+
+        for (int x = 0; x < resizedBitmap.getWidth(); ++x) {
+            for (int y = 0; y < resizedBitmap.getHeight(); ++y) {
+
+                fr_x = (int) Math.floor(x * nWidthFactor);
+                fr_y = (int) Math.floor(y * nHeightFactor);
+                cx = fr_x + 1;
+                if (cx >= img.getWidth())
+                    cx = fr_x;
+                cy = fr_y + 1;
+                if (cy >= img.getHeight())
+                    cy = fr_y;
+                fx = x * nWidthFactor - fr_x;
+                fy = y * nHeightFactor - fr_y;
+                nx = 1.0 - fx;
+                ny = 1.0 - fy;
+
+                color1 = img.getPixel(fr_x, fr_y);
+                color2 = img.getPixel(cx, fr_y);
+                color3 = img.getPixel(fr_x, cy);
+                color4 = img.getPixel(cx, cy);
+
+                // Blue
+                bp1 = (byte) (nx * Color.blue(color1) + fx * Color.blue(color2));
+                bp2 = (byte) (nx * Color.blue(color3) + fx * Color.blue(color4));
+                nBlue = (byte) (ny * (double) (bp1) + fy * (double) (bp2));
+
+                // Green
+                bp1 = (byte) (nx * Color.green(color1) + fx * Color.green(color2));
+                bp2 = (byte) (nx * Color.green(color3) + fx * Color.green(color4));
+                nGreen = (byte) (ny * (double) (bp1) + fy * (double) (bp2));
+
+                // Red
+                bp1 = (byte) (nx * Color.red(color1) + fx * Color.red(color2));
+                bp2 = (byte) (nx * Color.red(color3) + fx * Color.red(color4));
+                nRed = (byte) (ny * (double) (bp1) + fy * (double) (bp2));
+
+                resizedBitmap.setPixel(x, y, Color.argb(255, nRed, nGreen, nBlue));
+            }
+        }*/
+
+        resizedBitmap = setGrayscale(resizedBitmap);
+        resizedBitmap = removeNoise(resizedBitmap);
+
         return resizedBitmap;
+    }
+
+    // SetGrayscale
+    private Bitmap setGrayscale(Bitmap img) {
+        Bitmap bmap = img.copy(img.getConfig(), true);
+        int c;
+        for (int i = 0; i < bmap.getWidth(); i++) {
+            for (int j = 0; j < bmap.getHeight(); j++) {
+                c = bmap.getPixel(i, j);
+                byte gray = (byte) (.299 * Color.red(c) + .587 * Color.green(c)
+                        + .114 * Color.blue(c));
+
+                bmap.setPixel(i, j, Color.argb(255, gray, gray, gray));
+            }
+        }
+        return bmap;
+    }
+
+    // RemoveNoise
+    private Bitmap removeNoise(Bitmap bmap) {
+        for (int x = 0; x < bmap.getWidth(); x++) {
+            for (int y = 0; y < bmap.getHeight(); y++) {
+                int pixel = bmap.getPixel(x, y);
+                if (Color.red(pixel) < 162 && Color.green(pixel) < 162 && Color.blue(pixel) < 162) {
+                    bmap.setPixel(x, y, Color.BLACK);
+                }
+            }
+        }
+        for (int x = 0; x < bmap.getWidth(); x++) {
+            for (int y = 0; y < bmap.getHeight(); y++) {
+                int pixel = bmap.getPixel(x, y);
+                if (Color.red(pixel) > 162 && Color.green(pixel) > 162 && Color.blue(pixel) > 162) {
+                    bmap.setPixel(x, y, Color.WHITE);
+                }
+            }
+        }
+        return bmap;
     }
 
     //Tesseract Code
