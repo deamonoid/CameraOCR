@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -23,6 +24,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.googlecode.tesseract.android.TessBaseAPI;
+
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -36,6 +45,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
+    private View mView;
     Bitmap resizedBitmap;
     String datapath = "";
     private TessBaseAPI mTess;
@@ -43,6 +53,21 @@ public class MainActivity extends AppCompatActivity {
     private CameraPreview mPreview;
     private FrameLayout cameraPreviewLayout;
     private ImageView capturedImageHolder;
+
+    private BaseLoaderCallback mCallback = new BaseLoaderCallback(this) {
+        @Override
+        public void onManagerConnected(int status) {
+            switch (status) {
+                case LoaderCallbackInterface.SUCCESS:
+                {
+                    Log.i(TAG, "OpenCV loaded successfully");
+                    // Create and set View
+                    setContentView(R.layout.activity_main);
+                }
+            }
+            super.onManagerConnected(status);
+        }
+    };
 
 
     @Override
@@ -282,8 +307,9 @@ public class MainActivity extends AppCompatActivity {
             }
         }*/
 
-        resizedBitmap = setGrayscale(resizedBitmap);
+        //resizedBitmap = setGrayscale(resizedBitmap);
         resizedBitmap = removeNoise(resizedBitmap);
+        resizedBitmap = detectEdges(resizedBitmap);
 
         return resizedBitmap;
     }
@@ -323,6 +349,23 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return bmap;
+    }
+
+    //Canny Edge Detection
+    private Bitmap detectEdges(Bitmap bmap){
+
+        Mat rgba = new Mat();
+        Utils.bitmapToMat(bmap, rgba);
+
+        Mat edges = new Mat(rgba.size(), CvType.CV_8UC1);
+        Imgproc.cvtColor(rgba, edges, Imgproc.COLOR_RGB2GRAY, 4);
+        Imgproc.Canny(edges, edges, 80, 100);
+
+        Bitmap resultBitmap = Bitmap.createBitmap(edges.cols(), edges.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(edges, resultBitmap);
+
+        return resultBitmap;
+
     }
 
     //Tesseract Code
@@ -378,5 +421,12 @@ public class MainActivity extends AppCompatActivity {
         OCRresult = mTess.getUTF8Text();
         TextView OCRTextView = (TextView) findViewById(R.id.OCRTextView);
         OCRTextView.setText(OCRresult);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_10, this, mCallback);
     }
 }
